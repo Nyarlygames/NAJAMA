@@ -9,6 +9,7 @@ public class Controls : MonoBehaviour {
     public Transform psize;
     public Transform gsize;
     public int zone; // 1 = right / 2 = up / 3 = left / 4 = down
+    Vector3 rotadjusted = Vector3.zero;
 
     // Use this for initialization
     void Start ()
@@ -48,10 +49,10 @@ public class Controls : MonoBehaviour {
         float offsety = psize.localScale.z;
         float maxx = gposx + offsetx;
         float maxy = gposy + offsety;
-        float speed = 0.5f;
+        float speed = 0.2f;
         float rotationspeed = 1.0f;
         Vector3 readjusted = psize.position;
-        Vector3 rot = psize.transform.rotation.eulerAngles;
+        // Vector3 rot = psize.transform.rotation.eulerAngles;
         if (posx > maxx)
             posx = maxx;
         if (posx < -maxx)
@@ -83,6 +84,7 @@ public class Controls : MonoBehaviour {
                     float overflow = (posy + (moveV * speed)) - maxy;
                     // go right
                     readjusted = new Vector3(posx - overflow, 0.0f, maxy);
+                    transform.eulerAngles = new Vector3(transform.eulerAngles.x, -90.0f, transform.eulerAngles.z);
                     zone = 2;
                 }
             }
@@ -90,15 +92,14 @@ public class Controls : MonoBehaviour {
             {
                 if ((posy == maxy) && (posx != -maxx))
                 {
-                    if (posx + (moveV * speed) > -maxx)
+                    if (posy + (moveV * speed) > -maxx)
                     {
-                        //  right lane
                         readjusted = new Vector3(posx - (moveV * speed), 0.0f, posy);
                         zone = 2;
                     }
                     else
                     {
-                        // down corner
+                        // USELESS CAUSE CORNER MAXYMAXX and cba to delete (just in case)
                         readjusted = new Vector3(-maxx, 0.0f, posy - (moveV * speed));
                         zone = 3;
 
@@ -111,12 +112,14 @@ public class Controls : MonoBehaviour {
                     {
                         //down lane
                         readjusted = new Vector3(posx, 0.0f, posy - (moveV * speed));
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, -180.0f, transform.eulerAngles.z);
                         zone = 3;
                     }
                     else
                     {
                         //left corner
                         readjusted = new Vector3(posx + (moveV * speed), 0.0f, -maxy);
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, 90.0f, transform.eulerAngles.z);
                         zone = 4;
                     }
                 }
@@ -132,6 +135,7 @@ public class Controls : MonoBehaviour {
                     {
                         //up corner
                         readjusted = new Vector3(maxx, 0.0f, posy + (moveV * speed));
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0.0f, transform.eulerAngles.z);
                         zone = 1;
                     }
 
@@ -147,11 +151,13 @@ public class Controls : MonoBehaviour {
                     // go down
                     float overflow = (posy + (moveV * speed)) - (-maxy);
                     readjusted = new Vector3(posx + overflow, 0.0f, -maxy);
+                    transform.eulerAngles = new Vector3(transform.eulerAngles.x, 90.0f, transform.eulerAngles.z);
                     zone = 4;
                 }
                 else
                 {
                     readjusted = new Vector3(posx, 0.0f, posy + (moveV * speed)); // right to down
+
                     zone = 1;
                 }
             }
@@ -169,6 +175,7 @@ public class Controls : MonoBehaviour {
                     {
                         // down to left
                         readjusted = new Vector3(-maxx, 0.0f, posy - (moveV * speed));
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, -180.0f, transform.eulerAngles.z);
                         zone = 3;
 
                     }
@@ -186,6 +193,7 @@ public class Controls : MonoBehaviour {
                     {
                         // left to up
                         readjusted = new Vector3(posx - (moveV * speed), 0.0f, maxy);
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, -90.0f, transform.eulerAngles.z);
                         zone = 2;
                     }
                 }
@@ -201,56 +209,57 @@ public class Controls : MonoBehaviour {
                     {
                         // up to right
                         readjusted = new Vector3(maxx, 0.0f, posy + (moveV * speed));
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0.0f, transform.eulerAngles.z);
                         zone = 1;
                     }
 
                 }
             }
         }
-        
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            rot = new Vector3(0, -rotationspeed, 0);
-            psize.transform.Rotate(rot);
+            if ((zone == 1) && ((rotadjusted.y - rotationspeed > -65) && (rotadjusted.y - rotationspeed < 65)))
+            {
+                rotadjusted.y -= rotationspeed;
+                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
+            }
+           /* else if ((zone == 2) && (psize.rotation.y < -35) && (rot.y > -145))
+            {
+                psize.transform.Rotate(rot);
+            }
+            else if ((zone == 3) && (rot.y > 130) && (rot.y < 245))
+            {
+                psize.transform.Rotate(rot);
+            }
+            else if ((zone == 4) && (rot.y < 145) && (rot.y > 30))
+            {
+                psize.transform.Rotate(rot);
+            }*/
 
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            rot = new Vector3(0, rotationspeed, 0);
-            psize.transform.Rotate(rot);
+            Debug.Log(rotadjusted.y + rotationspeed);
+            if ((zone == 1) && ((rotadjusted.y + rotationspeed > -65.0f) && (rotadjusted.y + rotationspeed < 65.0f)))
+            {
+                rotadjusted.y += rotationspeed;
+                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
+            }
+            else if((zone == 2) && (rotadjusted.y + rotationspeed > -65) && (rotadjusted.y + rotationspeed < 65))
+            {
+                rotadjusted.y += rotationspeed;
+                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
+            }
+            /*else if((zone == 3) && (rot.y > 130) && (rot.y < 245))
+            {
+                psize.transform.Rotate(rot);
+            }
+            else if ((zone == 4) && (rot.y < 145) && (rot.y > 30))
+            {
+                psize.transform.Rotate(rot);
+            }*/
         }
-        if ((zone == 1) && (rot.y > -75) && (rot.y < 75))
-        {
-          //  Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            rot = new Vector3(0.0f, 0.0f, 0.0f);
-          //  Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            psize.transform.Rotate(rot);
-        }
-        if ((zone == 2) && (rot.y > -35) && (rot.y < -145))
-        {
-          //  Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            rot = new Vector3(0.0f, -90f, 0.0f);
-           // Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            psize.transform.Rotate(rot);
-        }
-        if ((zone == 3) && (rot.y > 130) && (rot.y < 245))
-        {
-        //    Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            rot = new Vector3(0.0f, -180f, 0.0f);
-           // Debug.Log("zone : " + zone + " rot : " + rot + " rotp : " + psize.rotation.y);
-            psize.transform.Rotate(rot);
-        }
-        if ((zone == 4) && (rot.y < 145) && (rot.y > 30))
-        {
-            rot = new Vector3(0.0f, 90f, 0.0f);
-          //  Debug.Log("zone : " + zone + " rot : " + rot);
-            psize.transform.Rotate(rot);
-        }
-        /* else
-         {
-             rot = Vector3.zero;
-         }*/
         psize.transform.position = readjusted;
     }
 }

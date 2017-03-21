@@ -123,7 +123,7 @@ public class Ball : MonoBehaviour {
                     Debug.Log("bcol velocity " + bcol.velocity);
                 }*/
             }
-            Debug.Log("flowing");
+           // Debug.Log("flowing");
         }
 
         if (flowing == false )
@@ -172,7 +172,7 @@ public class Ball : MonoBehaviour {
             }
             else
             {
-                Debug.Log("sticky");
+                //Debug.Log("sticky");
                 // replace ball on player
                 GameObject player = GameObject.Find("Player1");
                 Controls playercontrols = player.GetComponent<Controls>();
