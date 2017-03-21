@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour {
 
-    float speedx = 15f;
+    float speedx = 20f;
     float speedz = 5f;
-    float gravity = 0.5f;
+    float gravity = 35.0f;
     Vector3 dir = new Vector3(0.0f, 0.0f, 0.0f);
     public Rigidbody bcol;
     public Transform bsize;
@@ -40,7 +40,6 @@ public class Ball : MonoBehaviour {
             gsize = goal.transform;
         }
         dir = new Vector3(-speedx, 0.0f, 0.0f);
-       // bcol.AddForce(dir, ForceMode.VelocityChange);
         flowingmode = 0; // 0 start - normal line, 1 curved, 2 ??, 3 ??
         flowing = true;
     }
@@ -55,35 +54,25 @@ public class Ball : MonoBehaviour {
     void FixedUpdate ()
     {
 
-
-
-        /* float bosx = bsize.transform.position.x;
-         float bosz = bsize.transform.position.z;
-         float posx = psize.transform.position.x;
-         float posz = psize.transform.position.z;
-         float psizex = psize.localScale.x ;
-         float psizey = psize.localScale.z / 2;
-         float msizex = msize.localScale.x / 2;
-         float msizey = msize.localScale.z / 2;
-         float gsizex = gsize.localScale.x / 2;
-         float gsizey = gsize.localScale.z / 2;*/
-        //Debug.Log("lossy : " + msize.worldToLocalMatrix);
-        // ----------------------------------------------------- unescape ground -------------------------------------//
-        if (bsize.position.x + (bsize.localScale.x /2) > msize.localScale.x*10 / 2)
-            bsize.transform.position = new Vector3(-(msize.localScale.x *10 / 2) + (bsize.localScale.x/2), bsize.position.y, bsize.position.z);
-        if (bsize.position.x - (bsize.localScale.x /2) < -(msize.localScale.x*10 / 2))
-            bsize.transform.position = new Vector3((msize.localScale.x *10/ 2) - (bsize.localScale.x / 2), bsize.position.y, bsize.position.z);
         
-        if (bsize.position.z - (bsize.localScale.z / 2) < -(msize.localScale.z *10 / 2))
-            bsize.transform.position = new Vector3(bsize.position.x, bsize.position.y, (msize.localScale.z * 10 / 2) -(bsize.localScale.z / 2));
-        if (bsize.position.z + (bsize.localScale.z / 2) > (msize.localScale.z *10 / 2))
-            bsize.transform.position = new Vector3(bsize.position.x, bsize.position.y, -(msize.localScale.z * 10 / 2) + (bsize.localScale.z / 2));
+        // ----------------------------------------------------- unescape ground -------------------------------------//
+
+
+        if (bsize.position.x + (bsize.localScale.x /2) > msize.localScale.x / 2)
+            bsize.transform.position = new Vector3(-(msize.localScale.x / 2) + (bsize.localScale.x/2), bsize.position.y, bsize.position.z);
+        if (bsize.position.x - (bsize.localScale.x /2) < -(msize.localScale.x / 2))
+            bsize.transform.position = new Vector3((msize.localScale.x / 2) - (bsize.localScale.x / 2), bsize.position.y, bsize.position.z);
+        
+        if (bsize.position.z - (bsize.localScale.z / 2) < -(msize.localScale.z / 2))
+            bsize.transform.position = new Vector3(bsize.position.x, bsize.position.y, (msize.localScale.z / 2) -(bsize.localScale.z / 2));
+        if (bsize.position.z + (bsize.localScale.z / 2) > (msize.localScale.z / 2))
+            bsize.transform.position = new Vector3(bsize.position.x, bsize.position.y, -(msize.localScale.z / 2) + (bsize.localScale.z / 2));
 
 
         if (flowing == true)
         {
-            float maxGravDist = 40.0f;
-            float maxGravity = 35.0f;
+            float maxGravDist = msize.localScale.x;
+            float maxGravity = gravity;
             float dist;
             Vector3 adjusteddir;
             GameObject players = GameObject.Find("Player1");
@@ -91,19 +80,19 @@ public class Ball : MonoBehaviour {
             switch (playergravity.zone)
             {
                 case 1: // right
-                    adjusteddir = new Vector3(gsize.position.x + gsize.localScale.x / 2, psize.position.y, psize.position.z);
+                    adjusteddir = new Vector3(gsize.position.x + gsize.localScale.x / 2, bsize.position.y, bsize.position.z);
                     break;
                 case 2: // up
-                    adjusteddir = new Vector3(psize.position.x, psize.position.y, gsize.position.z + gsize.localScale.z / 2);
+                    adjusteddir = new Vector3(gsize.position.x, gsize.position.y, gsize.position.z + gsize.localScale.z / 2);
                     break;
                 case 3: // left
-                    adjusteddir = new Vector3(gsize.position.x - gsize.localScale.x / 2, psize.position.y, psize.position.z);
+                    adjusteddir = new Vector3(gsize.position.x - gsize.localScale.x / 2, bsize.position.y, bsize.position.z);
                     break;
                 case 4: // down
-                    adjusteddir = new Vector3(psize.position.x, psize.position.y, gsize.position.z - gsize.localScale.z / 2);
+                    adjusteddir = new Vector3(gsize.position.x, gsize.position.y, gsize.position.z - gsize.localScale.z / 2);
                     break;
                 default:
-                    adjusteddir = new Vector3(gsize.position.x, psize.position.y, gsize.localScale.z);
+                    adjusteddir = new Vector3(gsize.position.x, bsize.position.y, gsize.localScale.z);
                     break;
             }
             // GRAVITY AROUND HERE
@@ -123,41 +112,25 @@ public class Ball : MonoBehaviour {
                     Debug.Log("bcol velocity " + bcol.velocity);
                 }*/
             }
-           // Debug.Log("flowing");
         }
 
         if (flowing == false )
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Debug.Log("space");
-                var rot = Quaternion.AngleAxis(psize.rotation.y, Vector3.right);
-                var lDirection = rot * Vector3.forward;
-               // var wDirection = transform.TransformDirection(lDirection);
-
-
-
-                // line ball
+                //var rot = Quaternion.AngleAxis(psize.rotation.y, Vector3.right);
+                //var lDirection = rot * Vector3.forward;
+                var dir2 = Quaternion.AngleAxis(psize.transform.eulerAngles.y, Vector3.down) * Vector3.right;
+                dir2.x *= msize.localScale.x / 2;
                 GameObject player = GameObject.Find("Player1");
                 Controls playercontrols = player.GetComponent<Controls>();
-                switch (playercontrols.zone)
-                {
-                    case 1:
-                        dir = new Vector3(speedx, 0.0f, 0.0f);
-                        break;
-                    case 2:
-                        dir = new Vector3(0.0f, 0.0f, speedz);
-                        break;
-                    case 3:
-                        dir = new Vector3(-speedx, 0.0f, 0.0f);
-                        break;
-                    case 4:
-                        dir = new Vector3(0.0f, 0.0f, -speedz);
-                        break;
-                }
-                bcol.velocity = Vector3.zero;
-                bcol.AddForce(lDirection, ForceMode.VelocityChange);
-                flowingmode = 0;
+                if ((playercontrols.zone == 1) || (playercontrols.zone == 3))
+                    dir2.z *= -1;
+                dir2.z *= msize.localScale.z / 2;
+                bcol.velocity = dir2 * 2;
+
+
+                flowingmode = 1;
                 flowing = true;
             }
             else if (Input.GetKeyDown(KeyCode.C))
@@ -165,15 +138,14 @@ public class Ball : MonoBehaviour {
                 Debug.Log("c");
                 // curve ball
                 dir = new Vector3(19.0f, 0.0f, 0.0f);
-                //bsize.transform.position = Vector3.Slerp(bsize.transform.position, new Vector3 (19.0f, 0.0f, 0.0f), 0.1f);
                 bcol.AddForce(dir, ForceMode.VelocityChange);
                 flowingmode = 1;
                 flowing = true;
             }
             else
             {
-                //Debug.Log("sticky");
                 // replace ball on player
+                bcol.rotation = Quaternion.identity;
                 GameObject player = GameObject.Find("Player1");
                 Controls playercontrols = player.GetComponent<Controls>();
                 switch (playercontrols.zone)
@@ -219,7 +191,6 @@ public class Ball : MonoBehaviour {
                     break;
             }
             flowing = false;
-            Debug.Log("TOUCHEE--------------------------------------------------------");
         }/*
          else if (col.gameObject.name == "Goal")
          {

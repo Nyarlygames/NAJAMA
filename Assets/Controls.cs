@@ -8,6 +8,7 @@ public class Controls : MonoBehaviour {
     public Rigidbody bcol;
     public Transform psize;
     public Transform gsize;
+    public Transform msize;
     public int zone; // 1 = right / 2 = up / 3 = left / 4 = down
     Vector3 rotadjusted = Vector3.zero;
 
@@ -27,13 +28,18 @@ public class Controls : MonoBehaviour {
         {
             bcol = ball.GetComponent<Rigidbody>();
         }
+        GameObject ground = GameObject.Find("Ground");
+        if (ground != null)
+        {
+            msize = ground.transform;
+        }
         zone = 1;
     }
 
     // Update is called once per frame
     void Update () {
-		
-	}
+        
+    }
 
     void FixedUpdate()
     {
@@ -50,7 +56,6 @@ public class Controls : MonoBehaviour {
         float maxx = gposx + offsetx;
         float maxy = gposy + offsety;
         float speed = 0.2f;
-        float rotationspeed = 1.0f;
         Vector3 readjusted = psize.position;
         // Vector3 rot = psize.transform.rotation.eulerAngles;
         if (posx > maxx)
@@ -84,7 +89,11 @@ public class Controls : MonoBehaviour {
                     float overflow = (posy + (moveV * speed)) - maxy;
                     // go right
                     readjusted = new Vector3(posx - overflow, 0.0f, maxy);
-                    transform.eulerAngles = new Vector3(transform.eulerAngles.x, -90.0f, transform.eulerAngles.z);
+                    if (rotadjusted.y > -34.0f)
+                    {
+                        transform.eulerAngles = new Vector3(transform.eulerAngles.x, -35.0f, transform.eulerAngles.z);
+                        rotadjusted.y = -35.0f;
+                    }
                     zone = 2;
                 }
             }
@@ -102,9 +111,7 @@ public class Controls : MonoBehaviour {
                         // USELESS CAUSE CORNER MAXYMAXX and cba to delete (just in case)
                         readjusted = new Vector3(-maxx, 0.0f, posy - (moveV * speed));
                         zone = 3;
-
                     }
-
                 }
                 else if (posx == -maxx)
                 {
@@ -113,6 +120,7 @@ public class Controls : MonoBehaviour {
                         //down lane
                         readjusted = new Vector3(posx, 0.0f, posy - (moveV * speed));
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, -180.0f, transform.eulerAngles.z);
+                        rotadjusted.y = -180.0f;
                         zone = 3;
                     }
                     else
@@ -120,6 +128,7 @@ public class Controls : MonoBehaviour {
                         //left corner
                         readjusted = new Vector3(posx + (moveV * speed), 0.0f, -maxy);
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 90.0f, transform.eulerAngles.z);
+                        rotadjusted.y = 90.0f;
                         zone = 4;
                     }
                 }
@@ -136,6 +145,7 @@ public class Controls : MonoBehaviour {
                         //up corner
                         readjusted = new Vector3(maxx, 0.0f, posy + (moveV * speed));
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0.0f, transform.eulerAngles.z);
+                        rotadjusted.y = 0.0f;
                         zone = 1;
                     }
 
@@ -152,6 +162,7 @@ public class Controls : MonoBehaviour {
                     float overflow = (posy + (moveV * speed)) - (-maxy);
                     readjusted = new Vector3(posx + overflow, 0.0f, -maxy);
                     transform.eulerAngles = new Vector3(transform.eulerAngles.x, 90.0f, transform.eulerAngles.z);
+                    rotadjusted.y = 90.0f;
                     zone = 4;
                 }
                 else
@@ -176,10 +187,10 @@ public class Controls : MonoBehaviour {
                         // down to left
                         readjusted = new Vector3(-maxx, 0.0f, posy - (moveV * speed));
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, -180.0f, transform.eulerAngles.z);
+                        rotadjusted.y = -180.0f;
                         zone = 3;
 
                     }
-
                 }
                 else if (posx == -maxx)
                 {
@@ -194,6 +205,7 @@ public class Controls : MonoBehaviour {
                         // left to up
                         readjusted = new Vector3(posx - (moveV * speed), 0.0f, maxy);
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, -90.0f, transform.eulerAngles.z);
+                        rotadjusted.y = -90.0f;
                         zone = 2;
                     }
                 }
@@ -210,56 +222,66 @@ public class Controls : MonoBehaviour {
                         // up to right
                         readjusted = new Vector3(maxx, 0.0f, posy + (moveV * speed));
                         transform.eulerAngles = new Vector3(transform.eulerAngles.x, 0.0f, transform.eulerAngles.z);
+                        rotadjusted.y = 0.0f;
                         zone = 1;
                     }
 
                 }
             }
         }
-
-        if (Input.GetKey(KeyCode.RightArrow))
+        float angle = 0.0f;
+        switch (zone)
         {
-            if ((zone == 1) && ((rotadjusted.y - rotationspeed > -65) && (rotadjusted.y - rotationspeed < 65)))
-            {
-                rotadjusted.y -= rotationspeed;
-                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
-            }
-           /* else if ((zone == 2) && (psize.rotation.y < -35) && (rot.y > -145))
-            {
-                psize.transform.Rotate(rot);
-            }
-            else if ((zone == 3) && (rot.y > 130) && (rot.y < 245))
-            {
-                psize.transform.Rotate(rot);
-            }
-            else if ((zone == 4) && (rot.y < 145) && (rot.y > 30))
-            {
-                psize.transform.Rotate(rot);
-            }*/
-
+            case 1:
+                if ((Input.mousePosition.y >= Camera.main.pixelHeight / 2) && (Input.mousePosition.y < Camera.main.pixelHeight) && (Input.mousePosition.y > 0))
+                {
+                    angle = (Input.mousePosition.y - Camera.main.pixelHeight / 2) / (Camera.main.pixelHeight / 2) * 65.0f;
+                }
+                else if (Input.mousePosition.y < Camera.main.pixelHeight / 2)
+                {
+                    angle = (Input.mousePosition.y - Camera.main.pixelHeight / 2) / (Camera.main.pixelHeight / 2) * 65.0f;
+                }
+                break;
+            case 2:
+                if ((Input.mousePosition.x >= Camera.main.pixelWidth / 2) && (Input.mousePosition.x < Camera.main.pixelWidth) && (Input.mousePosition.x > 0))
+                {
+                    angle = (Input.mousePosition.x - Camera.main.pixelWidth / 2) / (Camera.main.pixelWidth / 2) * -65.0f;
+                    angle -= 90.0f;
+                }
+                else if (Input.mousePosition.x < Camera.main.pixelWidth / 2)
+                {
+                    angle = (Input.mousePosition.x - Camera.main.pixelWidth / 2) / (Camera.main.pixelWidth / 2) * -65.0f;
+                    angle -= 90.0f;
+                }
+                break;
+            case 3:
+                if ((Input.mousePosition.y >= Camera.main.pixelHeight / 2) && (Input.mousePosition.y < Camera.main.pixelHeight) && (Input.mousePosition.y > 0))
+                {
+                    angle = (Input.mousePosition.y - Camera.main.pixelHeight / 2) / (Camera.main.pixelHeight / 2) * -65.0f;
+                    angle -= 180.0f;
+                }
+                else if (Input.mousePosition.y < Camera.main.pixelHeight / 2)
+                {
+                    angle = (Input.mousePosition.y - Camera.main.pixelHeight / 2) / (Camera.main.pixelHeight / 2) * -65.0f;
+                    angle -= 180.0f;
+                }
+                break;
+            case 4:
+                if ((Input.mousePosition.x >= Camera.main.pixelWidth / 2) && (Input.mousePosition.x < Camera.main.pixelWidth) && (Input.mousePosition.x > 0))
+                {
+                    angle = (Input.mousePosition.x - Camera.main.pixelWidth / 2) / (Camera.main.pixelWidth / 2) * 65.0f;
+                    angle += 90.0f;
+                }
+                else if (Input.mousePosition.x < Camera.main.pixelWidth / 2)
+                {
+                    angle = (Input.mousePosition.x - Camera.main.pixelWidth / 2) / (Camera.main.pixelWidth / 2) * 65.0f;
+                    angle += 90.0f;
+                }
+                break;
+            default:
+                break;
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            Debug.Log(rotadjusted.y + rotationspeed);
-            if ((zone == 1) && ((rotadjusted.y + rotationspeed > -65.0f) && (rotadjusted.y + rotationspeed < 65.0f)))
-            {
-                rotadjusted.y += rotationspeed;
-                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
-            }
-            else if((zone == 2) && (rotadjusted.y + rotationspeed > -65) && (rotadjusted.y + rotationspeed < 65))
-            {
-                rotadjusted.y += rotationspeed;
-                transform.eulerAngles = new Vector3(transform.eulerAngles.x, rotadjusted.y, transform.eulerAngles.z);
-            }
-            /*else if((zone == 3) && (rot.y > 130) && (rot.y < 245))
-            {
-                psize.transform.Rotate(rot);
-            }
-            else if ((zone == 4) && (rot.y < 145) && (rot.y > 30))
-            {
-                psize.transform.Rotate(rot);
-            }*/
-        }
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
         psize.transform.position = readjusted;
     }
 }
