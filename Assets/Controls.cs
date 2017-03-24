@@ -11,13 +11,21 @@ public class Controls : MonoBehaviour {
     public Transform msize;
     public int zone; // 1 = right / 2 = up / 3 = left / 4 = down
     Vector3 rotadjusted = Vector3.zero;
+    public Vector3 dirmove;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         pcol = GetComponent<Rigidbody>();
         psize = GetComponent<Transform>();
-        psize.transform.position = new Vector3(1.5f,0.0f,0.0f);
+        if (name == "Player1") { 
+        psize.transform.position = new Vector3(psize.localScale.z / 2 + 1.0f, 0.0f, 0.0f);
+            zone = 1;
+        }
+        else if (name == "Player2") {
+            psize.transform.position = new Vector3(-psize.localScale.z / 2 - 1.0f, 0.0f, 0.0f);
+            zone = 3;
+        }
         GameObject goal = GameObject.Find("Goal");
         if (goal != null)
         {
@@ -33,7 +41,6 @@ public class Controls : MonoBehaviour {
         {
             msize = ground.transform;
         }
-        zone = 1;
     }
 
     // Update is called once per frame
@@ -44,36 +51,127 @@ public class Controls : MonoBehaviour {
     void FixedUpdate()
     {
         float moveV = Input.GetAxis("Vertical");
-
-        // up
+        
+        
 
         float posx = psize.position.x;
         float posy = psize.position.z;
         float gposx = gsize.localScale.x/2; // scale because pos is 0,0,0
         float gposy = gsize.localScale.z/2; // scale because pos is 0,0,0
-        float offsetx = 1.0f;//psize.localScale.x;
-        float offsety = psize.localScale.z;
-        float maxx = gposx + offsetx;
+        float offset = 1.0f;//psize.localScale.x;
+        float offsety = gsize.localScale.x/2 + 0.5f;
+        float maxx = gposx + offset;
         float maxy = gposy + offsety;
         float speed = 0.2f;
         Vector3 readjusted = psize.position;
+        Vector3 guple = new Vector3(-gsize.transform.localScale.x / 2, 0.0f, gsize.transform.localScale.z / 2);
+        Vector3 gupri = new Vector3(gsize.transform.localScale.x / 2, 0.0f, gsize.transform.localScale.z / 2);
+        Vector3 gdole = new Vector3(-gsize.transform.localScale.x / 2, 0.0f, -gsize.transform.localScale.z / 2);
+        Vector3 gdori = new Vector3(gsize.transform.localScale.x / 2, 0.0f, -gsize.transform.localScale.z / 2);
+        float angledori = Vector3.Angle(gdori, psize.position + psize.localScale);
+        Vector3 crossdori = Vector3.Cross(gdori, psize.position + psize.localScale);
+
+        float angleupri = Vector3.Angle(gupri, psize.position + psize.localScale);
+        Vector3 crossupri = Vector3.Cross(gupri, psize.position + psize.localScale);
+
+        float angleuple = Vector3.Angle(guple, psize.position + psize.localScale);
+        Vector3 crossuple = Vector3.Cross(guple, psize.position + psize.localScale);
+        float angledole = Vector3.Angle(gdole, psize.position + psize.localScale);
+        Vector3 crossdole = Vector3.Cross(gdole, psize.position + psize.localScale);
+
+       // readjusted = Vector3.zero;
+        if (crossdori.y < 0) angledori = -angledori;
+        if (crossupri.y < 0) angleupri = -angleupri;
+        if (crossdori.y < 0) angledole = -angledole;
+        if (crossupri.y < 0) angleuple = -angleuple;
+        
+        /*   if (((angleupri > 15) && (angleupri <= 180)) && ((angledori < -15) && (angledori >= -180))) //&& (bsize.transform.position.z <= gsize.transform.localScale.z / 2))
+           {
+               zone = 1;
+           }
+           if ((angleupri <= 15) && (angleupri >= -180) && ((angleuple >= -15) && (angleuple <= 180)))
+           {
+               zone = 2;
+           }
+           if ((angledole > 15) && (angledole <= 180) && ((angleuple < -15) && (angleuple >= -180)))
+           {
+               zone = 3;
+           }
+           if ((angledole <= 15) && (angledole >= -180) && ((angledori >= -15) && (angledori <= 180)))
+           {
+               zone = 4;
+           }*/
+
         // Vector3 rot = psize.transform.rotation.eulerAngles;
-        if (posx > maxx)
-            posx = maxx;
-        if (posx < -maxx)
-            posx = -maxx;
-        if (posy > maxy)
-            posy = maxy;
-        if (posy < -maxy)
-            posy = -maxy;
+        /*  if (posx > maxx)
+              posx = maxx;
+          if (posx < -maxx)
+              posx = -maxx;
+          if (posy > maxy)
+              posy = maxy;
+          if (posy < -maxy)
+              posy = -maxy;*/
         if ((posy < maxy) && (posy > -maxy) && ((posx != maxx) && (posx != -maxx)))
         {
-            Debug.Log("lost inside2");
+       //     Debug.Log("lost inside2");
         }
         if ((posx < maxx) && (posx > -maxx) && ((posy != maxy) && (posy != -maxy)))
         {
-            Debug.Log("lost inside");
+       //     Debug.Log("lost inside");
         }
+
+        if (zone == 1)
+            posx = maxx;
+        if (zone == 2)
+            posy = maxy;
+        if (zone == 3)
+            posx = -maxx;
+        if (zone == 4)
+            posy = -maxy;
+        /* Vector3 up = new Vector3();
+         Vector3 down = new Vector3();
+         Vector3 right = new Vector3();
+         Vector3 left = new Vector3();
+
+         if (Input.GetKey(KeyCode.UpArrow))
+         {
+             if (pcol.velocity.x < 50.0f) // or y <50
+             {
+                 switch (zone)
+                 {
+                     case 1:
+                         dirmove = new Vector3(0.0f, 0.0f, gsize.localScale.z / 2 + offset);
+                         pcol.velocity += dirmove * speed;
+                         break;
+                     case 2:
+                         dirmove = new Vector3(-gsize.localScale.x / 2 - offset, 0.0f, 0.0f);
+                         // Debug.Log("dirmove" + dirmove);
+                         pcol.velocity += dirmove * speed;
+                         //Debug.Log("v" + pcol.velocity);
+                         break;
+                     case 3:
+                         dirmove = new Vector3(0.0f, 0.0f, -gsize.localScale.z / 2 - offset);
+                         pcol.velocity += dirmove * speed;
+                         break;
+                     case 4:
+                         dirmove = new Vector3(gsize.localScale.x / 2 + offset, 0.0f, 0.0f);
+                         pcol.velocity += dirmove * speed;
+                         break;
+
+                 }
+
+             }
+         }
+
+         if (Input.GetKeyUp(KeyCode.UpArrow))
+         {
+             pcol.velocity = Vector3.zero;
+             Debug.Log("up");
+         }*/
+
+
+
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
             //---------------------------------------- TODO : overflow everywhere instead of - move on lane directly?-------------------------------------
@@ -101,7 +199,7 @@ public class Controls : MonoBehaviour {
             {
                 if ((posy == maxy) && (posx != -maxx))
                 {
-                    if (posy + (moveV * speed) > -maxx)
+                    if (posx + (moveV * speed) > -maxx)
                     {
                         readjusted = new Vector3(posx - (moveV * speed), 0.0f, posy);
                         zone = 2;
@@ -283,5 +381,6 @@ public class Controls : MonoBehaviour {
         }
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.down);
         psize.transform.position = readjusted;
+      //  pcol.velocity += readjusted;
     }
 }
